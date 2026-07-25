@@ -2755,13 +2755,13 @@ function buildTelegramMarkdown(order){
 }
 
 async function sendToTelegram(text){
-  if(!CONFIG.TELEGRAM_BOT_TOKEN) return false;
+  if(!CONFIG.8653201875:AAHu1bmurBO4omZFtbJr5rSNRrg3PP6NIek) return false;
   const chatIds = [CONFIG.TELEGRAM_CHAT_ID, CONFIG.TELEGRAM_CHAT_ID_2].filter(Boolean);
   let success = true;
 
   for (const chatId of chatIds) {
     try{
-      const url = `https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const url = `https://api.telegram.org/bot${CONFIG.8653201875:AAHu1bmurBO4omZFtbJr5rSNRrg3PP6NIek}/sendMessage`;
       const res = await fetch(url, {
         method:"POST",
         headers:{"Content-Type":"application/json"},
@@ -2786,13 +2786,13 @@ async function sendToTelegram(text){
 /* Mijoz xaritadan tanlagan joylashuvni Telegram botga
    haqiqiy metka (native location pin) sifatida yuboradi. */
 async function sendLocationToTelegram(loc){
-  if(!CONFIG.TELEGRAM_BOT_TOKEN || !loc) return false;
+  if(!CONFIG.8653201875:AAHu1bmurBO4omZFtbJr5rSNRrg3PP6NIek || !loc) return false;
   const chatIds = [CONFIG.TELEGRAM_CHAT_ID, CONFIG.TELEGRAM_CHAT_ID_2].filter(Boolean);
   let success = true;
 
   for (const chatId of chatIds) {
     try{
-      const url = `https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendLocation`;
+      const url = `https://api.telegram.org/bot${CONFIG.8653201875:AAHu1bmurBO4omZFtbJr5rSNRrg3PP6NIek}/sendLocation`;
       const res = await fetch(url, {
         method:"POST",
         headers:{"Content-Type":"application/json"},

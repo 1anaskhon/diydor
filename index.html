@@ -197,8 +197,9 @@
   .eyebrow i{font-size:11px;}
   .hero h1{font-size:clamp(32px,5vw,52px); line-height:1.05; font-weight:900; color:var(--text-on-bg);}
   .hero h1 span{
-    background:#ffffff; color:var(--yellow); padding:2px 12px; border-radius:10px;
-    box-decoration-break:clone; -webkit-box-decoration-break:clone;
+    color:var(--yellow);
+    -webkit-text-stroke:6px #ffffff;
+    paint-order:stroke fill;
   }
   .hero p.lead{margin-top:16px; color:var(--muted-on-bg); font-size:16.5px; max-width:460px; line-height:1.6;}
   .hero-ctas{display:flex; gap:12px; margin-top:28px; flex-wrap:wrap;}
@@ -473,7 +474,7 @@
   .field label{display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:7px;}
   .field input,.field textarea{
     width:100%; padding:12px 14px; border-radius:12px; background:#0e131a; border:1.5px solid var(--border);
-    font-size:14px; color:var(--text); transition:.2s var(--ease); resize:vertical;
+    font-size:14px; color:var(--bg); transition:.2s var(--ease); resize:vertical;
   }
   .field input::placeholder,.field textarea::placeholder{color:var(--muted-2);}
   .field input:focus,.field textarea:focus{outline:none; border-color:var(--yellow); box-shadow:0 0 0 3px rgba(0,136,204,.15);}
@@ -907,11 +908,13 @@
       </div>
 
       <div id="adminCustomersSection" style="display:none;">
+        <button class="btn btn-ghost btn-block" id="adminClearCustomersBtn" type="button" style="margin-bottom:14px; color:var(--red); border-color:var(--red);"><i class="fa-solid fa-trash-can"></i> Barcha mijozlarni tozalash</button>
         <div class="admin-customer-list" id="adminCustomerList"></div>
       </div>
 
       <div id="adminStatsSection" style="display:none;">
         <div id="adminStatsContent"></div>
+        <button class="btn btn-ghost btn-block" id="adminResetStatsBtn" type="button" style="margin-top:16px; color:var(--red); border-color:var(--red);"><i class="fa-solid fa-rotate-left"></i> Statistikani nolga tushirish</button>
       </div>
 
       <div id="adminInfoSection" style="display:none;">
@@ -3327,6 +3330,47 @@ function fetchAllOrders(){
     return [];
   });
 }
+
+async function deleteAllDocsInCollection(collectionName){
+  const snap = await db.collection(collectionName).get();
+  const docs = snap.docs;
+  const chunkSize = 450;
+  for(let i=0; i<docs.length; i+=chunkSize){
+    const batch = db.batch();
+    docs.slice(i, i+chunkSize).forEach(d=> batch.delete(d.ref));
+    await batch.commit();
+  }
+  return docs.length;
+}
+
+document.getElementById("adminClearCustomersBtn").addEventListener("click", async ()=>{
+  if(!firebaseAvailable){ showToast("Internet yo'q", "error"); return; }
+  const sure = confirm("DIQQAT! Barcha mijozlar ro'yxati va ularning statistikasi butunlay o'chiriladi. Mijozlarning oldingi buyurtmalari \"Tarix\" bo'limida saqlanib qoladi. Bu amalni qaytarib bo'lmaydi. Rostdan ham davom etasizmi?");
+  if(!sure) return;
+  try{
+    await deleteAllDocsInCollection(CUSTOMERS_COLLECTION);
+    showToast("Barcha mijozlar tozalandi", "success");
+    expandedCustomerDigits = null;
+    renderAdminCustomerList();
+  }catch(err){
+    console.error("Mijozlarni tozalashda xatolik:", err);
+    showToast("Xatolik yuz berdi", "error");
+  }
+});
+
+document.getElementById("adminResetStatsBtn").addEventListener("click", async ()=>{
+  if(!firebaseAvailable){ showToast("Internet yo'q", "error"); return; }
+  const sure = confirm("DIQQAT! Barcha buyurtmalar va statistika butunlay 0 ga tushiriladi. Bu amalni qaytarib bo'lmaydi. Rostdan ham davom etasizmi?");
+  if(!sure) return;
+  try{
+    await deleteAllDocsInCollection(ORDERS_COLLECTION);
+    showToast("Statistika nolga tushirildi", "success");
+    renderAdminStats();
+  }catch(err){
+    console.error("Statistikani tozalashda xatolik:", err);
+    showToast("Xatolik yuz berdi", "error");
+  }
+});
 
 async function adminAdvanceOrderStatus(orderId, currentStatus, phoneDigits, deliveryType){
   const steps = deliveryType==="pickup" ? STATUS_STEPS_PICKUP : STATUS_STEPS_DELIVERY;
